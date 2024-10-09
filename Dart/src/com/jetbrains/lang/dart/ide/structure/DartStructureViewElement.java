@@ -109,7 +109,7 @@ final class DartStructureViewElement extends PsiTreeElementBase<PsiElement> {
     final Element element = myOutline.getElement();
     final boolean finalOrConst = element.isConst() || element.isFinal();
 
-    return switch (element.getKind()) {
+    final Icon baseIcon = switch (element.getKind()) {
       case ElementKind.CLASS -> element.isAbstract() ? AbstractClass : AllIcons.Nodes.Class;
       case ElementKind.EXTENSION -> Include;
       case ElementKind.MIXIN -> AbstractClass;
@@ -141,6 +141,20 @@ final class DartStructureViewElement extends PsiTreeElementBase<PsiElement> {
         null;
       default -> null;
     };
+
+    if (baseIcon == null) return null;
+
+    final Icon visibilityIcon;
+    if (ElementKind.FUNCTION.equals(element.getKind()) && !element.isTopLevelOrStatic()) {
+      visibilityIcon = PackageLocal;
+    }
+    else if (element.isPrivate()) {
+      visibilityIcon = Private;
+    }
+    else {
+      visibilityIcon = Public;
+    }
+    return IconManager.getInstance().createRowIcon(baseIcon, visibilityIcon);
   }
 
   @Nullable
